@@ -1,0 +1,5 @@
+project.md
+*.exe
+mctypes.exe
+
+config/secure
