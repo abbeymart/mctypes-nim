@@ -8,17 +8,25 @@
 #             mConnect Trading Solution Types/Models
 #
 
-## mConnect shared types for all mConnect solutions:
-## Database | ValueType etc...
-## 
+## mConnect Trading Solution types / model definitions
+##  
 ##
 
-# types
-import db_postgres, json, tables
+import json, tables, times
 
 # Define types
 type
-    Database* = ref object
-        db: DbConn
-         
-    ValueType* = int | string | float | bool | JsonNode | BiggestInt | BiggestFloat | Table | seq | SqlQuery | Database
+    Order* = object
+        uid*: string
+        firstName*: string
+        middleName*: string
+        lastName*: string
+
+    Cart* = object
+        uid*: string
+        collName*: string
+        collValues*: JsonNode
+        collNewValues*: JsonNode
+        logDate*: DateTime
+        logBy*: string
+        products*: Table[string, JsonNode]

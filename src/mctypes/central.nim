@@ -8,13 +8,13 @@
 #             mConnect Shared Services/Solution Types/Models
 #
 
-## mConnect shared types and constructors for all mConnect solutions:
+## mConnect Shared Services types / model definitions:
 ## Database | ValueType etc...
 ## 
 ##
 
 # types
-import json, tables, times
+import json, times
 
 # Define types
 type
