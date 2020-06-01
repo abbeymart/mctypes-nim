@@ -5,7 +5,7 @@
 #    See the file "LICENSE.md", included in this
 #    distribution, for details about the copyright / license.
 # 
-#             Transaction (Audit) Log Package
+#               mctypes Log Package
 #
 
 ##      This the entry point to the mctypes package

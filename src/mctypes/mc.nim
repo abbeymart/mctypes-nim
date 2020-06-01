@@ -18,9 +18,8 @@ import db_postgres, json, tables
 
 # Define types
 type
-    Database* = ref object
-        db*: DbConn
-         
-    ValueType* = int | string | float | bool | JsonNode | BiggestInt | BiggestFloat | Table | seq | SqlQuery | Database
-
+    Database = ref object
+        db: DbConn
     
+    ValueType* = int | string | float | bool | Positive | Natural | JsonNode | BiggestInt | BiggestFloat | Table | seq | SqlQuery | Database
+ 
