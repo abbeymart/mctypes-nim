@@ -74,6 +74,7 @@ type
         collName*: string
         collValues*: JsonNode
         collNewValues*: JsonNode
+        logType*: string
         logDate*: DateTime
         logBy*: User
 

@@ -5,28 +5,31 @@
 #    See the file "LICENSE.md", included in this
 #    distribution, for details about the copyright / license.
 # 
-#             mConnect Marketplace Trading Solution Types/Models
+#             Supply Chain Management (SCM) Types
 #
 
-## mConnect Marketplace Trading Solution types / model definitions
+## mConnect Supply Chain Management Solution types / model definitions
 ##  
 ##
 
 import json, tables, times
+import central
 
 # Define types
 type
-    Order* = object
+    Warehouse* = object
         uid*: string
         firstName*: string
         middleName*: string
         lastName*: string
 
-    Cart* = object
+    Storage* = object
         uid*: string
         collName*: string
         collValues*: JsonNode
         collNewValues*: JsonNode
         logDate*: DateTime
         logBy*: string
+        store: Warehouse
         products*: Table[string, JsonNode]
+        actionTracker: ActionTracker

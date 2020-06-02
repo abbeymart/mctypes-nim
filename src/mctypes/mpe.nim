@@ -13,6 +13,7 @@
 ##
 
 import json, tables, times
+import central
 
 # Define types
 type
@@ -30,3 +31,4 @@ type
         logDate*: DateTime
         logBy*: string
         products*: Table[string, JsonNode]
+        actionTracker: ActionTracker
