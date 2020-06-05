@@ -18,6 +18,17 @@ import json, times
 
 # Define types
 type
+    FieldDefinition* = ref object
+        fieldName: string
+        fieldType: string
+        fieldLength: uint
+        fieldPatern: string
+        notNull: bool
+        unique: bool
+        indexable: bool
+        primaryKey: bool
+        fieldDefaultValue: proc(user: FieldDefinition): typedesc
+
     Profile* = object
         isAdmin*: bool
         defaultGroup*: string
@@ -25,9 +36,12 @@ type
         dob*: DateTime
 
     User* = object
-        firstName*: string
-        middleName*: string
-        lastName*: string
+        username*: string
+        email*: string
+        recovery_email*: string
+        firstname*: string
+        middlename*: string
+        lastname*: string
         profile*: Profile
         lang*: string
         desc*: string
