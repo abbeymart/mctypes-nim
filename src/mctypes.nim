@@ -12,7 +12,8 @@
 ## 
 ## 
 
-import mctypes/mc, mctypes/central
+import mctypes/mc, mctypes/central, mctypes/errors
 
 export mc
 export central
+export errors
