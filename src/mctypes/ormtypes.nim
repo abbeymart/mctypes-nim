@@ -6,9 +6,8 @@ import sharedtypes
 type
     FieldDescType* = object
         fieldType*: DataTypes
-        fieldLength*: Positive
-        fieldPattern*: string # "![0-9]" => excluding digit 0 to 9 | "![_, -, \, /, *, |, ]" => exclude the charaters
-        # fieldFormat*: string # "12.2" => max 12 digits, including 2 digits after the decimal => fieldPattern
+        fieldLength*: uint
+        fieldPattern*: string # regex-pattern: "![0-9]" => excluding digit 0 to 9 | "![_, -, \, /, *, |, ]" => exclude the charaters
         allowNull*: bool
         unique*: bool
         indexable*: bool

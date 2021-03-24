@@ -121,12 +121,11 @@ type
         language:  string 
         loginName: string 
         token:     string
-        expire:    Positive
+        expire:    uint
         group :    string
         email:     string
 
     ProcType* = proc(): DataTypes    ## will automatically receive record value for the model
-    ProcValidateType* = proc(): bool
 
     ProcedureTypes* = enum
         PROC,              ## proc(): T
@@ -174,11 +173,7 @@ type
 
 
     # DB operation types
-    ValueParamType* = Table[string, ValueType]
-    SortParamType* = Table[string, int] # 1 for "asc", -1 for "desc"
-    ProjectParamType* = Table[string, bool | int] # 1/true => include | 0/false => exclude
-    ExistParamType* = Table[string, ValueType]
-    ExistParamsType* = seq[ExistParamType]
+    # ValueParamType* = Table[string, ValueType]
 
     ValidateResponseType* = object
         ok: bool

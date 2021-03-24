@@ -67,11 +67,26 @@ type
         roleServices*: seq[RoleServiceType]
         tableId*: string
 
+    CheckAccessParamsType* = object 
+        accessDb*: Database
+        userInfo*: UserInfoType
+        tableName*: string
+        recordIds*: seq[string]
+        accessTable*: string
+        userTable*: string
+        roleTable*: string
+        serviceTable*: string
+        userProfileTable*: string
+
     PermissionType* = object
         ok*: bool
         accessInfo*: CheckAccessType
 
     RoleFuncType* = proc (it1: string; it2: RoleServiceType): bool
+    SortParamType* = Table[string, int] # 1 for "asc", -1 for "desc"
+    ProjectParamType* = Table[string, bool | int] # 1/true => include | 0/false => exclude
+    # ExistParamType* = Table[string, ValueType]
+    ExistParamsType* = seq[JsonNode]
     
     CurrentRecordType* = object
         currentRec*: seq[Row]
@@ -91,7 +106,7 @@ type
         fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
         fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
         fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParam ## for WHERE IN (SELECT field from fieldColl)
+        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldColl)
         fieldPostOp*: string ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
         groupOp*: string     ## e.g. AND | OR...
         fieldAlias*: string ## for SELECT/Read query
@@ -104,100 +119,15 @@ type
         groupOrder*: int
         groupItems*: seq[FieldItem]
 
-    ## functionType => MIN(min), MAX, SUM, AVE, COUNT, CUSTOM/USER defined
-    ## fieldItems=> specify fields/parameters to match the arguments for the functionType.
-    ## The fieldType must match the argument types expected by the functionType, 
-    ## otherwise the only the first function-matching field will be used, as applicable
-    QueryFunction* = object
-        functionType*: string
-        fieldItems*: seq[FieldItem]
-        
-    QueryParam* = object
-        tableName*: string    ## default: "" => will use tableName instead
-        fieldItems*: seq[FieldItem]   ## @[] => SELECT * (all fields)
-        whereParams*: seq[WhereParam]
-
-    QueryTop* = object         
-        topValue*: int
-        topUnit*: string ## number or percentage (# or %)
-    
-    CaseCondition* = object
-        fieldItems*: seq[FieldItem]
-        resultMessage*: string
-        resultField*: string  ## for ORDER BY options
-
-    CaseQueryParam* = object
-        conditions*: seq[CaseCondition]
-        defaultField*: string   ## for ORDER BY options
-        defaultMessage*: string 
-        orderBy*: bool
-        asField*: string
-
-    SelectFromParam* = object
-        tableName*: string
-        fieldItems*: seq[FieldItem]
-
-    InsertIntoParam* = object
-        tableName*: string
-        fieldItems*: seq[FieldItem]
-
-    GroupParam* = object
-        fieldName*: string
-        fieldOrder*: int
-
-    OrderParam* = object
-        tableName*: string
-        fieldName*: string
-        queryFunction*: QueryFunction
-        fieldOrder*: string ## "ASC" ("asc") | "DESC" ("desc")
-        functionOrder*: string
-
-    # for aggregate query condition
-    HavingParam* = object
-        tableName: string
-        queryFunction*: QueryFunction
-        queryOp*: string
-        queryOpValue*: string ## value will be cast to fieldType in queryFunction
-        orderType*: string ## "ASC" ("asc") | "DESC" ("desc")
-        # subQueryParams*: SubQueryParam # for ANY, ALL, EXISTS...
-
     SubQueryParam* = object
         whereType*: string   ## EXISTS, ANY, ALL
         whereField*: string  ## for ANY / ALL | Must match the fieldName in queryParam
         whereOp*: string     ## e.g. "=" for ANY / ALL
-        queryParams*: QueryParam
+        queryParams*: QueryParamType
         queryWhereParams*: WhereParam
 
-    ## combined/joined query (read) param-type
-    JoinSelectField* =  object
-        tableName*: string
-        collFields*: seq[FieldItem]
-    
-    JoinField* = object
-        tableName*: string
-        joinField*: string
-
-    JoinQueryParam* = object
-        selectFromColl*: string ## default to tableName
-        selectFields*: seq[JoinSelectField]
-        joinType*: string ## INNER (JOIN), OUTER (LEFT, RIGHT & FULL), SELF...
-        joinFields*: seq[JoinField] ## [{tableName: "abc", joinField: "field1" },]
-    
-    SelectIntoParam* = object
-        selectFields*: seq[FieldItem] ## @[] => SELECT *
-        intoColl*: string          ## new table/collection
-        fromColl*: string          ## old/external table/collection
-        fromFilename*: string      ## IN external DB file, e.g. backup.mdb
-        whereParam*: seq[WhereParam]
-        joinParam*: JoinQueryParam ## for copying from more than one table/collection
-
-    UnionQueryParam* = object
-        selectQueryParams*: seq[QueryParam]
-        whereParams*: seq[WhereParam]
-        orderParams*: seq[OrderParam]
-
     TaskRecordType* = object
-        taskRec*: seq[QueryParam]
+        taskRec*: seq[QueryParamType]
 
     QueryWhereTypes* = enum
         ID,
@@ -227,11 +157,11 @@ type
 
     FieldValueTypes* = string | int | bool | object | seq[string] | seq[int] | seq[bool] | seq[object]    
 
-    ValueParamsType* = Table[string, FieldValueTypes | DataTypes]    ## fieldName: fieldValue, must match fieldType (re: validate) in model definition
+    ValueParamsType* = Table[string, FieldValueTypes]    ## fieldName: fieldValue, must match fieldType (re: validate) in model definition
     
     ValueToDataType* = Table[string, DataTypes]
 
-    ActionParamsType* = seq[ValueParamsType]  ## documents for create or update task/operation
+    ActionParamsType* = seq[JsonNode]  ## documents for create or update task/operation
 
     QueryParamsType* = Table[string, DataTypes]
 
@@ -333,166 +263,7 @@ type
         topValue*: int    
         topUnit*: string ## number or percentage (# or %)
     
-    ## SELECT CASE... query condition(s)
-    ## 
-    CaseFieldType* = object
-        fieldTable*: string
-        fieldName*: string
-        fieldType*: DataTypes   ## "int", "string", "bool", "boolean", "float",...
-        fieldOrder*: int
-        fieldOp*: OperatorTypes    ## GT/gt/>, EQ/==, GTE/>=, LT/<, LTE/<=, NEQ(<>/!=), BETWEEN, NOTBETWEEN, IN, NOTIN, LIKE, IS, ISNULL, NOTNULL etc., with matching params (fields/values)
-        fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
-        fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
-        fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldTable)
-        fieldPostOp*: OperatorTypes ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
-        groupOp*: string     ## e.g. AND | OR...
-        fieldAlias*: string ## for SELECT/Read query
-        show*: bool     ## includes or excludes from the SELECT query fields
-        fieldFunction*: ProcedureTypes
-
-    CaseConditionType* = object
-        fields*: seq[CaseFieldType]
-        resultMessage*: string
-        resultField*: string  ## for ORDER BY options
-
-    ## For SELECT CASE... query
-    CaseQueryType* = object
-        conditions*: seq[CaseConditionType]
-        defaultField*: string   ## for ORDER BY options
-        defaultMessage*: string 
-        orderBy*: bool
-        asField*: string
-
-    SelectFromFieldType* = object
-        fieldTable*: string
-        fieldName*: string
-        fieldType*: DataTypes   ## "int", "string", "bool", "boolean", "float",...
-        fieldOrder*: int
-        fieldOp*: OperatorTypes    ## GT/gt/>, EQ/==, GTE/>=, LT/<, LTE/<=, NEQ(<>/!=), BETWEEN, NOTBETWEEN, IN, NOTIN, LIKE, IS, ISNULL, NOTNULL etc., with matching params (fields/values)
-        fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
-        fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
-        fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldTable)
-        fieldPostOp*: OperatorTypes ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
-        groupOp*: string     ## e.g. AND | OR...
-        fieldAlias*: string ## for SELECT/Read query
-        show*: bool     ## includes or excludes from the SELECT query fields
-        fieldFunction*: ProcedureTypes
-
-    SelectFromType* = object
-        tableName*: string
-        fields*: seq[SelectFromFieldType]
-
-    InsertIntoFieldType* = object
-        fieldTable*: string
-        fieldName*: string
-        fieldType*: DataTypes   ## "int", "string", "bool", "boolean", "float",...
-        fieldOrder*: int
-        fieldOp*: OperatorTypes    ## GT/gt/>, EQ/==, GTE/>=, LT/<, LTE/<=, NEQ(<>/!=), BETWEEN, NOTBETWEEN, IN, NOTIN, LIKE, IS, ISNULL, NOTNULL etc., with matching params (fields/values)
-        fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
-        fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
-        fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldTable)
-        fieldPostOp*: OperatorTypes ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
-        groupOp*: string     ## e.g. AND | OR...
-        fieldAlias*: string ## for SELECT/Read query
-        show*: bool     ## includes or excludes from the SELECT query fields
-        fieldFunction*: ProcedureTypes
-
-    InsertIntoType* = object
-        tableName*: string
-        fields*: seq[InsertIntoFieldType]
-
-    GroupType* = object
-        fields*: seq[string]
-        fieldFunction*: seq[ProcedureTypes]
-        fieldOrder*: int
-
-    OrderType* = object
-        tableName*: string
-        fieldName*: string
-        queryProc*: ProcedureTypes
-        fieldOrder*: OrderTypes ## "ASC" ("asc") | "DESC" ("desc")
-        functionOrder*: OrderTypes
-
-    # for aggregate query condition
-    HavingType* = object
-        tableName: string
-        queryProc*: ProcedureTypes
-        queryOp*: OperatorTypes
-        queryOpValue*: string ## value will be cast to fieldType in queryProc
-        orderType*: OrderTypes ## "ASC" ("asc") | "DESC" ("desc")
-        # subQueryParams*: SubQueryParam # for ANY, ALL, EXISTS...
-
-    SubQueryType* = object
-        whereType*: string   ## EXISTS, ANY, ALL
-        whereField*: string  ## for ANY / ALL | Must match the fieldName in QueryParamType
-        whereOp*: OperatorTypes     ## e.g. "=" for ANY / ALL
-        queryParams*: QueryParamType
-        queryWhereParams*: WhereParamType
-
-    ## combined/joined query (read) param-type
-    ## 
-    JoinSelectFieldItemType* = object
-        fieldTable*: string
-        fieldName*: string
-        fieldType*: DataTypes   ## "int", "string", "bool", "boolean", "float",...
-        fieldOrder*: int
-        fieldOp*: OperatorTypes    ## GT/gt/>, EQ/==, GTE/>=, LT/<, LTE/<=, NEQ(<>/!=), BETWEEN, NOTBETWEEN, IN, NOTIN, LIKE, IS, ISNULL, NOTNULL etc., with matching params (fields/values)
-        fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
-        fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
-        fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldTable)
-        fieldPostOp*: OperatorTypes ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
-        groupOp*: string     ## e.g. AND | OR...
-        fieldAlias*: string ## for SELECT/Read query
-        show*: bool     ## includes or excludes from the SELECT query fields
-        fieldFunction*: ProcedureTypes
     
-    JoinSelectFieldType* =  object
-        tableName*: string
-        tableFields*: seq[JoinSelectFieldItemType]
-    
-    JoinFieldType* = object
-        tableName*: string
-        joinField*: string
-
-    JoinQueryType* = object
-        selectFromTable*: string ## default to tableName
-        selectFields*: seq[JoinSelectFieldType]
-        joinType*: string ## INNER (JOIN), OUTER (LEFT, RIGHT & FULL), SELF...
-        joinFields*: seq[JoinFieldType] ## [{tableName: "abc", joinField: "field1" },]
-    
-    SelectIntoFieldType* = object
-        fieldTable*: string
-        fieldName*: string
-        fieldType*: DataTypes   ## "int", "string", "bool", "boolean", "float",...
-        fieldOrder*: int
-        fieldOp*: OperatorTypes    ## GT/gt/>, EQ/==, GTE/>=, LT/<, LTE/<=, NEQ(<>/!=), BETWEEN, NOTBETWEEN, IN, NOTIN, LIKE, IS, ISNULL, NOTNULL etc., with matching params (fields/values)
-        fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
-        fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
-        fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldTable)
-        fieldPostOp*: OperatorTypes ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
-        groupOp*: string     ## e.g. AND | OR...
-        fieldAlias*: string ## for SELECT/Read query
-        show*: bool     ## includes or excludes from the SELECT query fields
-        fieldFunction*: ProcedureTypes
-
-    SelectIntoType* = object
-        selectFields*: seq[SelectIntoFieldType] ## @[] => SELECT *
-        intoTable*: string          ## new table/collection
-        fromTable*: string          ## old/external table/collection
-        fromFilename*: string      ## IN external DB file, e.g. backup.mdb
-        WhereParamType*: seq[WhereParamType]
-        joinParam*: JoinQueryType ## for copying from more than one table/collection
-
-    UnionQueryType* = object
-        selectQueryParams*: seq[QueryParamType]
-        where*: seq[WhereParamType]
-        orderParams*: seq[OrderType]
-
     CurrentRecord* = object
         currentRec*: seq[Row]
     
@@ -640,3 +411,15 @@ type
         updateTableFields*:  seq[string]
         getTableFields*:     seq[string]
         auditLog*:           bool
+
+    CrudResultType* = object 
+        queryParams*: WhereParamType
+        recordIds*: seq[string]
+        recordCount*: uint
+        tableRecords*: seq[JsonNode]
+
+    LogRecordsType* = object 
+        queryParams*: WhereParamType
+        recordIds*: seq[string]
+        tableFields*: seq[string]
+        tableRecords*: seq[JsonNode]
