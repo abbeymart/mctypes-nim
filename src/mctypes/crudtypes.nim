@@ -166,13 +166,7 @@ type
     CrudParamsType* = ref object
         appDb*: Database
         userInfo*: UserInfoType
-        ## tableName: table/collection to insert, update, read or delete record(s).
         tableName*: string 
-        ## actionParams: @[{tableName: "abc", fieldNames: @["field1", "field2"]},], for create & update.
-        ## Field names and corresponding values of record(s) to insert/create or update.
-        ## Field-values will be validated based on data model definition.
-        ## ValueError exception will be raised for invalid value/data type 
-        ##
         actionParams*: seq[ActionParamsType]
         existParams*: ExistParamsType
         queryParams*: WhereParamType
@@ -214,22 +208,22 @@ type
         accessTable*: string
         verifyTable*: string
         userProfileTable*: string
-        maxQueryLimit: Positive
-        logAll: bool
-        logCreate: bool
-        logUpdate: bool
-        logRead: bool
-        logDelete: bool
-        logLogin: bool
-        logLogout: bool
-        unAuthorizedMessage: string
-        recExistMessage: string
-        cacheExpire: Positive
+        maxQueryLimit*: uint
+        logAll*: bool
+        logCreate*: bool
+        logUpdate*: bool
+        logRead*: bool
+        logDelete*: bool
+        logLogin*: bool
+        logLogout*: bool
+        unAuthorizedMessage*: string
+        recExistMessage*: string
+        cacheExpire*: uint
         # modelOptions: ModelOptionsType
-        loginTimeout: Positive
-        usernameExistsMessage: string
-        emailExistsMessage: string
-        msgFrom: string
+        loginTimeout*: uint
+        usernameExistsMessage*: string
+        emailExistsMessage*: string
+        msgFrom*: string
 
     CrudType* = ref object
         params*: CrudParamsType
