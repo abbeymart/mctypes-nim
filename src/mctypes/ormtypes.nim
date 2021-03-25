@@ -4,6 +4,23 @@ import sharedtypes
 
 
 type
+    # TODO: review / simplify definition
+    # ProcedureType* = object
+    #     procDesc: ProcType          # return string to be cast into procReturnType
+    #     procParams*: seq[string]    # proc params/fieldNames, to be injected into procName, used to get the fieldValue
+    #     procReturnType*: DataTypes  # proc return type
+
+    # ComputedFieldType* = object
+    #     fieldName*: string
+    #     fieldType*: DataTypes
+    #     fieldMethod*: ProcType
+
+    FieldValueTypes* = string | int | bool | object | seq[string] | seq[int] | seq[bool] | seq[object]    
+
+    RecordValueType* = Table[string, FieldValueTypes]    ## fieldName: fieldValue, must match fieldType (re: validate) in model definition
+    
+    ValueToDataType* = Table[string, DataTypes]
+
     FieldDescType* = object
         fieldType*: DataTypes
         fieldLength*: uint

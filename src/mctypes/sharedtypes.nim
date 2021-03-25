@@ -107,7 +107,7 @@ type
 
     ValueType* = int | string | float | bool | Positive | Natural | JsonNode | Time | BiggestInt | BiggestFloat | Table | seq | SqlQuery | Database
  
-    AuditStamptType* = object
+    AuditStampType* = object
         isActive: bool
         createdBy: string
         createdAt: DateTime
@@ -143,8 +143,6 @@ type
         BICONSUMERPROC,    ## proc(valA, valB: T): void
         COMPARATORPROC,    ## proc(valA, valB: T): int
         MODELPROC,         ## proc(): Model  | to define new data model
-
-    MessageObject* = Table[string, string]
     
     # functional procedure types
     IPredicateType* = proc(val: int): bool {.closure.} # {.closure.} is default to proc type
@@ -171,9 +169,7 @@ type
 
     ComputedProceduresType* = Table[string, ComputedProcedureType[DataTypes, DataTypes]]
 
-
-    # DB operation types
-    # ValueParamType* = Table[string, ValueType]
+    MessageObject* = Table[string, string]
 
     ValidateResponseType* = object
         ok: bool

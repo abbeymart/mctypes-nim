@@ -87,6 +87,7 @@ type
     ProjectParamType* = Table[string, bool | int] # 1/true => include | 0/false => exclude
     # ExistParamType* = Table[string, ValueType]
     ExistParamsType* = seq[JsonNode]
+    # ValueParamType* = Table[string, ValueType]
     
     CurrentRecordType* = object
         currentRec*: seq[Row]
@@ -113,18 +114,19 @@ type
         show*: bool     ## includes or excludes from the SELECT query fields
         fieldFunction*: string ## COUNT, MIN, MAX... for select/read-query...
 
-    WhereParam* = object
-        groupCat*: string
-        groupLinkOp*: string
-        groupOrder*: int
-        groupItems*: seq[FieldItem]
+    QueryItemType* = object 
+        groupItem*:      Table[string, JsonNode]    # key1 => fieldName, key2 => fieldOperator, interface{}=> value(s)
+        groupItemOrder*: int                        # item/field order within the group
+        groupItemOp*:    RelationTypes      # group-item relationship to the next item (AND, OR), the last item groupItemOp should be "" or will be ignored
 
-    SubQueryParam* = object
-        whereType*: string   ## EXISTS, ANY, ALL
-        whereField*: string  ## for ANY / ALL | Must match the fieldName in queryParam
-        whereOp*: string     ## e.g. "=" for ANY / ALL
-        queryParams*: QueryParamType
-        queryWhereParams*: WhereParam
+    QueryGroupType* = object
+        groupName*:   string          # for group-items(fields) categorization
+        groupItems*:  seq[QueryItemType] # group items to be composed by category
+        groupOrder*:  int             # group order
+        groupLinkOp*: RelationTypes    # group relationship to the next group (AND, OR), the last group groupLinkOp should be "" or will be ignored
+
+    QueryParamType = seq[QueryGroupType]
+    WhereParamType = seq[QueryGroupType]
 
     TaskRecordType* = object
         taskRec*: seq[QueryParamType]
@@ -144,146 +146,21 @@ type
     # # CreatedAtType* = DateTime | DataTypes
     # # UpdatedAtType* = DateTime | DataTypes
 
-    # TODO: review / simplify definition
-    ProcedureType* = object
-        procDesc: ProcType          # return string to be cast into procReturnType
-        procParams*: seq[string]    # proc params/fieldNames, to be injected into procName, used to get the fieldValue
-        procReturnType*: DataTypes  # proc return type
+    ActionParamsType* = seq[JsonNode]  ## records/documents for create or update task/operation
 
-    ComputedFieldType* = object
-        fieldName*: string
-        fieldType*: DataTypes
-        fieldMethod*: ProcType
-
-    FieldValueTypes* = string | int | bool | object | seq[string] | seq[int] | seq[bool] | seq[object]    
-
-    ValueParamsType* = Table[string, FieldValueTypes]    ## fieldName: fieldValue, must match fieldType (re: validate) in model definition
-    
-    ValueToDataType* = Table[string, DataTypes]
-
-    ActionParamsType* = seq[JsonNode]  ## documents for create or update task/operation
-
-    QueryParamsType* = Table[string, DataTypes]
+    # QueryParamsType* = Table[string, DataTypes]
 
     ActionParamTaskType* = object
         createItems*: ActionParamsType
         updateItems*: ActionParamsType
         recordIds*: seq[string]
 
-    SaveFieldType* = object
-        fieldName*: string
-        fieldValue*: string     ## must match the field DataTypes
-        fieldOrder*: Positive
-        fieldType*: DataTypes
-        fieldFunction*: ProcedureTypes ## COUNT, MIN, MAX... for select/read-query...
-
-    CreateFieldType* = Table[string, string] ## key = fieldName, value = fieldValue | must match model definition
-
-    UpdateFieldType* = object
-        fieldName*: string
-        fieldValue*: string
-        fieldOrder*: int
-        fieldFunction*: ProcedureTypes ## COUNT, MIN, MAX... for select/read-query...
-
-    ReadFieldType* = object
-        tableName*: string
-        fieldName*: string
-        fieldOrder*: int
-        fieldAlias*: string
-        show*: bool     ## includes or excludes from the SELECT query fields
-        fieldFunction*: ProcedureTypes ## COUNT, MIN, MAX... for select/read-query...
-
-    DeleteFieldType* = object
-        fieldName*: string
-        fieldSubQuery*: QueryParamType
-        fieldFunction*: ProcedureTypes ## COUNT, MIN, MAX... for select/read-query...
-
-    FieldSubQueryType* = object
-        tableName*: string    ## default: "" => will use instance tableName instead
-        fields*: seq[ReadFieldType]   ## @[] => SELECT * (all fields)
-        where*: seq[WhereParamType]
-
-    GroupFunctionType* = object
-        fields*: seq[string]
-        fieldFunction*: ProcedureTypes ## COUNT, MIN, MAX, custom... for select/read-query...
-
-    WhereFieldType* = object
-        fieldTable*: string
-        fieldType*: DataTypes
-        fieldName*: string
-        fieldOrder*: int
-        fieldOp*: OperatorTypes    ## GT/gt/>, EQ/==, GTE/>=, LT/<, LTE/<=, NEQ(<>/!=), BETWEEN, NOTBETWEEN, IN, NOTIN, LIKE, IS, ISNULL, NOTNULL etc., with matching params (fields/values)
-        fieldValue*: string  ## for insert/update | start value for range/BETWEEN/NOTBETWEEN and pattern for LIKE operators
-        fieldValueEnd*: string   ## end value for range/BETWEEN/NOTBETWEEN operator
-        fieldValues*: seq[string] ## values for IN/NOTIN operator
-        fieldSubQuery*: QueryParamType ## for WHERE IN (SELECT field from fieldTable)
-        fieldPostOp*: OperatorTypes ## EXISTS, ANY or ALL e.g. WHERE fieldName <fieldOp> <fieldPostOp> <anyAllQueryParams>
-        groupOp*: string     ## e.g. AND | OR...
-        fieldProc*: ProcedureTypes ## COUNT, MIN, MAX... for select/read-query...
-        fieldProcFields*: seq[string] ## parameters for the fieldProc
-
-    WhereParamType* = object
-        groupCat*: string       # group (items) categorization
-        groupLinkOp*: string        # group relationship to the next group (AND, OR)
-        groupOrder*: int        # group order, the last group groupLinkOp should be "" or will be ignored
-        groupItems*: seq[WhereFieldType] # group items to be composed by category
-
-    SaveParamType* = object
-        tableName*: string
-        fields*: seq[SaveFieldType]
-        where*: seq[WhereParamType]
-   
-    QueryParamType* = object        # same as QueryReadParamType
-        tableName*: string    ## default: "" => will use instance tableName instead
-        fields*: seq[ReadFieldType]   ## @[] => SELECT * (all fields)
-        where*: seq[WhereParamType] ## whereParams or docId(s)  will be required for delete task
-
-    QueryReadParamType* = object
-        tableName*: string
-        fields*: seq[ReadFieldType]
-        where*: seq[WhereParamType]
-
-    QuerySaveParamType* = object
-        tableName*: string
-        fields*: seq[SaveFieldType]
-        where*: seq[WhereParamType]
-
-    QueryUpdateParamType* = object
-        tableName*: string
-        fields*: seq[UpdateFieldType]
-        where*: seq[WhereParamType]
-
-    QueryDeleteParamType* = object
-        tableName*: string
-        fields*: seq[DeleteFieldType]
-        where*: seq[WhereParamType]
-
-    ## For SELECT TOP... query
-    QueryTopType* = object         
-        topValue*: int    
-        topUnit*: string ## number or percentage (# or %)
-    
-    
     CurrentRecord* = object
         currentRec*: seq[Row]
     
     TaskRecord* = object
         taskRec*: seq[QueryParamType]
         recCount*: int 
-
-    # Exception types
-    SaveError* = object of CatchableError
-    CreateError* = object of CatchableError
-    UpdateError* = object of CatchableError
-    DeleteError* = object of CatchableError
-    ReadError* = object of CatchableError
-    AuthError* = object of CatchableError
-    ConnectError* = object of CatchableError
-    SelectQueryError* = object of CatchableError
-    WhereQueryError* = object of CatchableError
-    CreateQueryError* = object of CatchableError
-    UpdateQueryError* = object of CatchableError
-    DeleteQueryError* = object of CatchableError
 
     ## CrudParamsType is the struct type for receiving, composing and passing CRUD inputs 
     CrudParamsType* = ref object
@@ -296,7 +173,7 @@ type
         ## Field-values will be validated based on data model definition.
         ## ValueError exception will be raised for invalid value/data type 
         ##
-        actionParams*: seq[SaveParamType]
+        actionParams*: seq[ActionParamsType]
         existParams*: ExistParamsType
         queryParams*: WhereParamType
         recordIds*: seq[string]  ## for update, delete and read tasks
@@ -423,3 +300,17 @@ type
         recordIds*: seq[string]
         tableFields*: seq[string]
         tableRecords*: seq[JsonNode]
+
+    # Exception types
+    SaveError* = object of CatchableError
+    CreateError* = object of CatchableError
+    UpdateError* = object of CatchableError
+    DeleteError* = object of CatchableError
+    ReadError* = object of CatchableError
+    AuthError* = object of CatchableError
+    ConnectError* = object of CatchableError
+    SelectQueryError* = object of CatchableError
+    WhereQueryError* = object of CatchableError
+    CreateQueryError* = object of CatchableError
+    UpdateQueryError* = object of CatchableError
+    DeleteQueryError* = object of CatchableError
