@@ -174,8 +174,8 @@ type
         projectParams*: ProjectParamType
         sortParams*: SortParamType
         token*: string
-        skip*: int
-        limit*: int
+        skip*: uint
+        limit*: uint
         taskName*: string
         defaultLimit*: int
         createTableFields*:  seq[string]
@@ -192,8 +192,8 @@ type
         unAuthMessage*: string
 
     CrudOptionsType* = ref object
-        skip*: Positive
-        limit*: Positive
+        skip*: uint
+        limit*: uint
         parentTables*: seq[string]
         childTables*: seq[string]
         recursiveDelete*: bool
