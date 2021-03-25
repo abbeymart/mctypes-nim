@@ -177,5 +177,3 @@ type
 
     OkayResponseType* = object
         ok*: bool
-
-    
