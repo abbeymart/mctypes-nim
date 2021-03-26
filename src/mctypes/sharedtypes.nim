@@ -13,7 +13,7 @@
 ## 
 ##
 
-# types
+# import dependencies
 import db_postgres, json, tables, times, json
 import mcdb
 
@@ -23,9 +23,9 @@ type
         STRING = "string",
         VARCHAR = "varchar",
         TEXT = "text",
-        UUID = "uuid",
         NUMBER = "number",
         POSITIVE = "positive",
+        NATURAL = "natural",
         INTEGER = "integer",
         DECIMAL = "decimal",
         FLOAT = "float",
@@ -36,6 +36,8 @@ type
         ARRAY_OF_NUMBER = "array_of_number",
         ARRAY_OF_BOOLEAN = "array_of_boolean",
         ARRAY_OF_OBJECT = "array_of_object",
+        ARRAY_OF_ARRAY = "array_of_array",
+        ARRAY_OF_ENUM = "array_of_enum",
         BOOLEAN = "boolean",
         DATETIME = "datetime",
         DATE = "date",
@@ -45,13 +47,28 @@ type
         POSTAL_CODE = "postal_code",
         EMAIL = "email",
         URL = "url",
-        PORT = "port",
-        IP_ADDRESS = "ip_address",
-        JWT = "jwt",
-        LAT_LONG = "lat_long",
+        LAT =  "latitude",
+        LONG = "longitude",
         ISO2 = "iso2",
         ISO3 = "iso3",
+        UUID = "uuid",
+        UUID3 = "uuid3",
+        UUID4 = "uuid4",
+        UUID5 = "uuid5",
+        MONGODB_ID  = "mongodb_id",
+        MD4   = "md4",
+        MD5   = "md5",
+        SHA1  = "sha1",
+        SHA256 = "sha2",
+        SHA384 = "sha3",
+        SHA512 = "sha5",
         MAC_ADDRESS = "mac_address",
+        PORT = "port",
+        IP_ADDRESS = "ip_address",
+        IP = "ip"
+        IP4 = "ip4"
+        IP6 = "ip6"
+        JWT = "jwt",
         MIME = "mime",
         CREDIT_CARD = "credit_card",
         CURRENCY = "currency",
@@ -59,7 +76,7 @@ type
         INT = "int",
         BOOL ="bool",
         JSON = "json",
-        OBJECT = "object",     ## key-value pairs
+        OBJECT = "object",     ## key-value pairs [table]
         ENUM = "enum",       ## Enumerations
         SET = "set",           ## Unique values set
         SEQ ="seq",
@@ -89,7 +106,7 @@ type
         NOT_BETWEEN = "not_between",
         EXCLUDES = "excludes",
         LIKE = "like",
-        NOT_LIKE = "notlike",
+        NOT_LIKE = "not_like",
         ILIKE = "ilike",
         NOT_ILIKE = "not_ilike",
         REGEX = "regex",
@@ -102,6 +119,7 @@ type
     RelationTypes* = enum
         AND = "and",
         OR = "or",
+        XOR = "xor",
 
     uuId* = string
 
@@ -144,6 +162,15 @@ type
         COMPARATORPROC,    ## proc(valA, valB: T): int
         MODELPROC,         ## proc(): Model  | to define new data model
     
+    MessageObject* = Table[string, string]
+
+    ValidateResponseType* = object
+        ok: bool
+        errors: MessageObject
+
+    OkayResponseType* = object
+        ok*: bool
+    
     # functional procedure types
     IPredicateType* = proc(val: int): bool {.closure.} # {.closure.} is default to proc type
     StringPredicateType* = proc(val: string): bool {.closure.} 
@@ -159,21 +186,26 @@ type
     ComparatorType*[T] = proc(val1: T, val2: T): int {.closure.} 
 
     GetValueProcedureType*[T]= proc(): T ## return a value of type T
-    SetValueProcedureType*[T]= proc(val: T): T ## receive val-object as parameter
-    DefaultValueProcedureType*[T, R] = proc(val: T): R ## may/optionally receive val-object as parameter
-    ValidateProcedureType*[T] = proc(val: T): bool  ## may/optionally receive val-object as parameter
+    SetValueProcedureType*[T]= proc(val: T): T ## receive val-object/val-of-type-T as parameter
+    DefaultValueProcedureType*[T, R] = proc(val: T): R ## may/optionally receive val-object/val-of-type-T as parameter
+    ComputedProcedureType*[T,R] = proc(val: T): R  ## receive val-of-type-T as parameter
+    ValidateProcedureType*[T] = proc(val: T): bool  ## receive val-object as parameter
     ValidateProcedureResponseType*[T] = proc(val: T): ValidateResponseType  ## receive val-object as parameter
-    ComputedProcedureType*[T,R] = proc(val: T): R  ## receive val-object as parameter
+   
+    ValidateProceduresType* = Table[string, ValidateProcedureResponseType]
 
-    ValidateProceduresType* = Table[string, ValidateProcedureResponseType[DataTypes]]
+    ComputedProceduresType* = Table[string, ComputedProcedureType]
 
-    ComputedProceduresType* = Table[string, ComputedProcedureType[DataTypes, DataTypes]]
+    GetProcType* = ref object
+        name*: ref GetValueProcedureType
 
-    MessageObject* = Table[string, string]
+    SetProcType* = ref object
+        name*: ref SetValueProcedureType
 
-    ValidateResponseType* = object
-        ok: bool
-        errors: MessageObject
+    DefaultProcType* = ref object
+        name*: ref DefaultValueProcedureType
 
-    OkayResponseType* = object
-        ok*: bool
+    ComputedProcType* = ref object
+        name*: ref ComputedProcedureType
+
+    ValidateProcType* = Table[string, ValidateProcedureType]

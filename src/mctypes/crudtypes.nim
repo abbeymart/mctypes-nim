@@ -85,9 +85,9 @@ type
     RoleFuncType* = proc (it1: string; it2: RoleServiceType): bool
     SortParamType* = Table[string, int] # 1 for "asc", -1 for "desc"
     ProjectParamType* = Table[string, bool | int] # 1/true => include | 0/false => exclude
-    # ExistParamType* = Table[string, ValueType]
-    ExistParamsType* = seq[JsonNode]
-    # ValueParamType* = Table[string, ValueType]
+    ExistParamType* = Table[string, ValueType]
+    ExistParamsType* = seq[ExistParamType]
+    ValueParamType* = Table[string, ValueType]
     
     CurrentRecordType* = object
         currentRec*: seq[Row]
@@ -99,7 +99,7 @@ type
     # groupCat: user-defined, e.g. "age-policy", "demo-group"
     # groupOrder: user-defined e.g. 1, 2...
     FieldItem* = object
-        fieldColl*: string
+        fieldTable*: string
         fieldName*: string
         fieldType*: string   ## "int", "string", "bool", "boolean", "float",...
         fieldOrder*: string
