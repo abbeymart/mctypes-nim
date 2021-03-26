@@ -14,7 +14,7 @@
 ##
 
 # import dependencies
-import db_postgres, json, tables, times, json
+import db_postgres, json, tables, times, json, options
 import mcdb
 
 # Define types
@@ -123,7 +123,7 @@ type
 
     uuId* = string
 
-    ValueType* = int | string | float | bool | Positive | Natural | JsonNode | Time | BiggestInt | BiggestFloat | Table | seq | SqlQuery | Database
+    ValueType* = int | string | float | bool | Positive | Natural | Time | BiggestInt | BiggestFloat | JsonNode | Table | seq[int] | seq[string] | seq[bool] | seq[float] | seq[Table] | SqlQuery | Database
  
     AuditStampType* = object
         isActive: bool
@@ -186,7 +186,7 @@ type
     ComparatorType*[T] = proc(val1: T, val2: T): int {.closure.} 
 
     GetValueProcedureType*[T]= proc(): T ## return a value of type T
-    SetValueProcedureType*[T]= proc(val: T): T ## receive val-object/val-of-type-T as parameter
+    SetValueProcedureType*[T]= proc(val: T): Option[T]## receive val-object/val-of-type-T as parameter
     DefaultValueProcedureType*[T, R] = proc(val: T): R ## may/optionally receive val-object/val-of-type-T as parameter
     ComputedProcedureType*[T,R] = proc(val: T): R  ## receive val-of-type-T as parameter
     ValidateProcedureType*[T] = proc(val: T): bool  ## receive val-object as parameter

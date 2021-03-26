@@ -177,19 +177,9 @@ type
         skip*: uint
         limit*: uint
         taskName*: string
-        defaultLimit*: int
-        createTableFields*:  seq[string]
-        updateTableFields*:  seq[string]
-        getTableFields*:     seq[string]
-
-        checkAccess*: bool
-        transLog*: LogParam
-        isRecExist*: bool
-        isAuthorized*: bool
-        currentRecords*: seq[Row]
-        roleServices*: seq[RoleServiceType]
-        recExistMessage*: string
-        unAuthMessage*: string
+        # createTableFields*:  seq[string]
+        # updateTableFields*:  seq[string]
+        # getTableFields*:     seq[string]
 
     CrudOptionsType* = ref object
         skip*: uint
@@ -208,6 +198,7 @@ type
         accessTable*: string
         verifyTable*: string
         userProfileTable*: string
+        defaultLimit*: int
         maxQueryLimit*: uint
         logAll*: bool
         logCreate*: bool
@@ -224,18 +215,26 @@ type
         usernameExistsMessage*: string
         emailExistsMessage*: string
         msgFrom*: string
+        unAuthMessage*: string
 
     CrudType* = ref object
         params*: CrudParamsType
         options*: CrudOptionsType
-        currentRecords*: string
-        transLog*:       LogParam
-        hashKey*:        string # Unique for exactly the same query
+        isRecExist*: bool
+        isAuthorized*: bool
+        isAdmin*: bool
+        currentRecords*: seq[Row]
+        createItems*: ActionParamsType
+        updateItems*: ActionParamsType
+        roleServices*: seq[RoleServiceType]
+        subItems*: seq[bool]
+        transLog*: LogParam
+        hashKey*: string # Unique for exactly the same query
 
     CreateQueryResponseType* = object
         createQuery*: string
-        fieldNames*:  seq[string]
-        fieldValues*:  seq[seq[JsonNode]]
+        fieldNames*:  seq[string]   # field-names for create-query
+        fieldValues*:  seq[seq[JsonNode]]   # seq of json-node: field-name:value pairs
 
     UpdateQueryResponseType* = object
         updateQuery*: string
@@ -244,7 +243,7 @@ type
 
     WhereQueryResponseType* = object
         whereQuery*:  string
-        fieldValues*:  seq[JsonNode] 
+        fieldValues*:  seq[JsonNode]
 
     DeleteQueryResponseType* = object
         deleteQuery*: string
@@ -256,10 +255,11 @@ type
         whereQuery*:  string
         fieldValues*:  seq[JsonNode]   
     
-    SaveParamsType* = object
-        userInfo*: UserInfoType
-        queryParams*: QueryParamType
-        recordIds*: seq[string]
+    # SaveParamsType* = object
+    #     userInfo*: UserInfoType
+    #     queryParams*: QueryParamType
+    #     recordIds*: seq[string]
+    #     actionParams*: ActionParamsType
 
     SaveCrudParamsType* = ref object
         params*:         CrudParamsType
@@ -278,19 +278,17 @@ type
     GetCrudParamsType* = ref object
         params*:         CrudParamsType
         options*:        CrudOptionsType
-        createTableFields*:  seq[string]
-        updateTableFields*:  seq[string]
         getTableFields*:     seq[string]
         auditLog*:           bool
 
     CrudResultType* = object 
-        queryParams*: WhereParamType
+        queryParams*: QueryParamType
         recordIds*: seq[string]
         recordCount*: uint
         tableRecords*: seq[JsonNode]
 
     LogRecordsType* = object 
-        queryParams*: WhereParamType
+        queryParams*: QueryParamType
         recordIds*: seq[string]
         tableFields*: seq[string]
         tableRecords*: seq[JsonNode]
