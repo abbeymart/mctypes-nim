@@ -85,7 +85,7 @@ type
     RoleFuncType* = proc (it1: string; it2: RoleServiceType): bool
     SortParamType* = Table[string, int] # 1 for "asc", -1 for "desc"
     ProjectParamType* = Table[string, bool | int] # 1/true => include | 0/false => exclude
-    ExistParamType* = Table[string, ValueType]
+    ExistParamType* = Table[string, JsonNode]
     ExistParamsType* = seq[ExistParamType]
     ValueParamType* = Table[string, ValueType]
     
@@ -174,8 +174,6 @@ type
         projectParams*: ProjectParamType
         sortParams*: SortParamType
         token*: string
-        skip*: uint
-        limit*: uint
         taskName*: string
         # createTableFields*:  seq[string]
         # updateTableFields*:  seq[string]
@@ -220,6 +218,66 @@ type
     CrudType* = ref object
         params*: CrudParamsType
         options*: CrudOptionsType
+        isRecExist*: bool
+        isAuthorized*: bool
+        isAdmin*: bool
+        currentRecords*: seq[Row]
+        createItems*: ActionParamsType
+        updateItems*: ActionParamsType
+        roleServices*: seq[RoleServiceType]
+        subItems*: seq[bool]
+        transLog*: LogParam
+        hashKey*: string # Unique for exactly the same query
+
+    CrudInstanceType* = ref object 
+        # params
+        appDb*: Database
+        userInfo*: UserInfoType
+        tableName*: string 
+        actionParams*: seq[ActionParamsType]
+        existParams*: ExistParamsType
+        queryParams*: WhereParamType
+        recordIds*: seq[string]  ## for update, delete and read tasks
+        projectParams*: ProjectParamType
+        sortParams*: SortParamType
+        token*: string
+        skip*: uint
+        limit*: uint
+        taskName*: string
+        # options
+        parentTables*: seq[string]
+        childTables*: seq[string]
+        recursiveDelete*: bool
+        checkAccess*: bool
+        accessDb*: Database
+        auditDb*: Database
+        serviceDb*: Database
+        auditTable*: string
+        serviceTable*: string
+        userTable*: string
+        roleTable*: string
+        accessTable*: string
+        verifyTable*: string
+        userProfileTable*: string
+        defaultLimit*: int
+        maxQueryLimit*: uint
+        logAll*: bool
+        logCreate*: bool
+        logUpdate*: bool
+        logRead*: bool
+        logDelete*: bool
+        logLogin*: bool
+        logLogout*: bool
+        unAuthorizedMessage*: string
+        recExistMessage*: string
+        cacheExpire*: uint
+        # modelOptions: ModelOptionsType
+        loginTimeout*: uint
+        usernameExistsMessage*: string
+        emailExistsMessage*: string
+        msgFrom*: string
+        unAuthMessage*: string
+        # shared instance variables
         isRecExist*: bool
         isAuthorized*: bool
         isAdmin*: bool

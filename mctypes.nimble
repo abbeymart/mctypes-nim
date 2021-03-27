@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.0"
+version       = "0.1.1"
 author        = "Abi Akindele [abbeymart]"
 description   = "mctypes package - shared types for mConnect solutions "
 license       = "MIT"
