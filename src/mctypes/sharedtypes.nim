@@ -126,11 +126,11 @@ type
     ValueType* = int | string | float | bool | Positive | Natural | Time | BiggestInt | BiggestFloat | JsonNode | Table | seq[int] | seq[string] | seq[bool] | seq[float] | seq[Table] | SqlQuery | Database
  
     AuditStampType* = object
-        isActive*: bool          # => activate by modelOptionsType settings...
-        createdBy*: Option[string]
-        createdAt*: Option[times.Datetime]
-        updatedBy*: Option[string]
-        updatedAt*: Option[times.Datetime]
+        isActive*: bool
+        createdBy*: string
+        createdAt*: DateTime
+        updatedBy*: string
+        updatedAt*: DateTime
     
     UserInfoType* = object
         userId*:    string
