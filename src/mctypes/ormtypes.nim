@@ -19,9 +19,9 @@ type
         primaryKey*: bool
         minValue*: float
         maxValue*: float
-        setValue*: SetProcType # transform fieldValue prior to insert/update | result/return type (DataTypes) must match the fieldType or cast string-result to fieldType
-        defaultValue*: DefaultProcType  # result/return type (DataTypes) must match the fieldType
-        validate*: ValidateProcType # result/return type (DataTypes) must match the fieldValue# validate field-value (pattern/format), returns a bool (valid=true/invalid=false)
+        setValue*: SetValueProcedureType[DataTypes] # transform fieldValue prior to insert/update | result/return type (DataTypes) must match the fieldType or cast string-result to fieldType
+        defaultValue*: DefaultValueProcedureType[DataTypes, DataTypes]  # result/return type (DataTypes) must match the fieldType
+        validate*: ValidateProceduresType # result/return type (DataTypes) must match the fieldValue# validate field-value (pattern/format), returns a bool (valid=true/invalid=false)
         validateMessage: string
         
     RecordDescType* = Table[string, DataTypes | FieldDescType]

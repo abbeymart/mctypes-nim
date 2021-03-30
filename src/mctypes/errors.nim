@@ -11,14 +11,3 @@
 ## mConnect Errors (Custom Exceptions) Types
 ## 
 ##
-
-type
-    SaveError* = object of CatchableError
-    CreateError* = object of CatchableError
-    UpdateError* = object of CatchableError
-    DeleteError* = object of CatchableError
-    ReadError* = object of CatchableError
-    AuthError* = object of CatchableError
-    ConnectError* = object of CatchableError
-
-

@@ -125,8 +125,8 @@ type
         groupOrder*:  int             # group order
         groupLinkOp*: RelationTypes    # group relationship to the next group (AND, OR), the last group groupLinkOp should be "" or will be ignored
 
-    QueryParamType = seq[QueryGroupType]
-    WhereParamType = seq[QueryGroupType]
+    QueryParamType* = seq[QueryGroupType]
+    WhereParamType* = seq[QueryGroupType]
 
     TaskRecordType* = object
         taskRec*: seq[QueryParamType]

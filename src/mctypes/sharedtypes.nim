@@ -126,22 +126,22 @@ type
     ValueType* = int | string | float | bool | Positive | Natural | Time | BiggestInt | BiggestFloat | JsonNode | Table | seq[int] | seq[string] | seq[bool] | seq[float] | seq[Table] | SqlQuery | Database
  
     AuditStampType* = object
-        isActive: bool
-        createdBy: string
-        createdAt: DateTime
-        updatedBy: string
-        updatedAt: DateTime
+        isActive*: bool          # => activate by modelOptionsType settings...
+        createdBy*: Option[string]
+        createdAt*: Option[times.Datetime]
+        updatedBy*: Option[string]
+        updatedAt*: Option[times.Datetime]
     
     UserInfoType* = object
-        userId:    string
-        firstName: string
-        lastName:  string 
-        language:  string 
-        loginName: string 
-        token:     string
-        expire:    uint
-        group :    string
-        email:     string
+        userId*:    string
+        firstName*: string
+        lastName*:  string 
+        language*:  string 
+        loginName*: string 
+        token*:     string
+        expire*:    uint
+        group*:    string
+        email*:     string
 
     ProcType* = proc(): DataTypes    ## will automatically receive record value for the model
 
@@ -165,8 +165,8 @@ type
     MessageObject* = Table[string, string]
 
     ValidateResponseType* = object
-        ok: bool
-        errors: MessageObject
+        ok*: bool
+        errors*: MessageObject
 
     OkayResponseType* = object
         ok*: bool
@@ -192,7 +192,7 @@ type
     ValidateProcedureType*[T] = proc(val: T): bool  ## receive val-object as parameter
     ValidateProcedureResponseType*[T] = proc(val: T): ValidateResponseType  ## receive val-object as parameter
    
-    ValidateProceduresType* = Table[string, ValidateProcedureResponseType]
+    ValidateProceduresType*[T] = Table[string, ValidateProcedureResponseType[T]]
 
     ComputedProceduresType* = Table[string, ComputedProcedureType]
 
